@@ -2,7 +2,6 @@
 using MineSweeper.Classes;
 using MineSweeper.Classes.CustomExceptions;
 using MineSweeper.Classes.Interfaces;
-using MineSweeper.DL;
 using MineSweeper.DL.Interfaces;
 using MineSweeper.Services.Interfaces;
 using System.Collections.Generic;
@@ -15,7 +14,6 @@ namespace MineSweeper.Services
     {
         private IContainer _container;
         IGameSettingsRepository _repo;
-        //IGameSettings _gameSettings;
         bool _settingsInitialised = false;
 
         public MineSweeperLogic()
@@ -35,7 +33,7 @@ namespace MineSweeper.Services
 
         public void ValidateRetrievedSettings(List<string> SettingsToValidate)
         {
-            Regex regex = new Regex(@"[0-9.*]");
+            Regex regex = new Regex(@"^[0-9.\* ]+$");
 
             if (SettingsToValidate.Any())
             {
@@ -51,7 +49,7 @@ namespace MineSweeper.Services
 
         public void ValidateFieldPanelSettings(List<string> FieldSettings)
         {
-            Regex regex = new Regex(@"[.*]");
+            Regex regex = new Regex(@"^[.*]+$");
             if (!FieldSettings.All(s => regex.IsMatch(s)))
                 throw new MineSweeperException("Invalid characters in field configuration");
         }
@@ -66,10 +64,12 @@ namespace MineSweeper.Services
                 var _gameSettings = _container.Resolve<IGameSettings>();
                 _settingsInitialised = false;
                 _gameSettings = SetFieldSize(_gameSettings, AllFieldsSettings[_nextField]);
+                //to validate width and height for board
+                _gameSettings.Validate();
                 ValidateFieldPanelSettings(AllFieldsSettings.GetRange(_nextField + 1, _gameSettings.Height));
                 _gameSettings = SetFieldPanels(_gameSettings, AllFieldsSettings.GetRange(_nextField + 1, _gameSettings.Height));
-                _settingsInitialised = true;
-                _gameSettings = ComputeAdjacentMineCounnt(_gameSettings);
+                _gameSettings = ComputeAdjacentMineCount(_gameSettings);
+                //to validate the whole object
                 _gameSettings.Validate();
 
                 _fieldList.Add(_gameSettings);
@@ -101,6 +101,7 @@ namespace MineSweeper.Services
                 GameSettings.FieldPanels[i] = _currLine;
             }
 
+            _settingsInitialised = true;
             return GameSettings;
         }
 
@@ -149,7 +150,7 @@ namespace MineSweeper.Services
                 return (CurrPanel.X > 0) ? true : false;
         }
 
-        public IGameSettings ComputeAdjacentMineCounnt(IGameSettings CurrentGameSettings)
+        public IGameSettings ComputeAdjacentMineCount(IGameSettings CurrentGameSettings)
         {
             if (_settingsInitialised)
             {

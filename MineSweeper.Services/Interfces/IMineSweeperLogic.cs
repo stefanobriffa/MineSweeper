@@ -9,6 +9,6 @@ namespace MineSweeper.Services.Interfaces
         void ValidateRetrievedSettings(List<string> SettingsToValidate);
         void ValidateFieldPanelSettings(List<string> FieldSettings);
         List<IGameSettings> BuildGameFields(List<string> AllFieldsSettings);
-        IGameSettings ComputeAdjacentMineCounnt(IGameSettings CurrentGameSettings);
+        IGameSettings ComputeAdjacentMineCount(IGameSettings CurrentGameSettings);
     }
 }
