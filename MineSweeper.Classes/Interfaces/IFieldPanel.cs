@@ -4,5 +4,7 @@
     {
         int X { get; set; }
         int Y { get; set; }
+        int AdjacentMines { get; set; }
+        void Validate();
     }
 }

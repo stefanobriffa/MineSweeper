@@ -1,4 +1,5 @@
-﻿using MineSweeper.Classes.Interfaces;
+﻿using MineSweeper.Classes.CustomExceptions;
+using MineSweeper.Classes.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -12,20 +13,23 @@ namespace MineSweeper.Classes
 
         [Range(1, 100)]
         public int Height { get; set; }
+
         public IFieldPanel[][] FieldPanels { get; set; }
 
-        public bool IsValid()
+        public void Validate()
         {
             var validationContext = new ValidationContext(this, null, null);
             var results = new List<ValidationResult>();
             var _isValid = Validator.TryValidateObject(this, validationContext, results, true);
+            var _errMsg = "";
 
             if (!_isValid)
+            {
                 foreach (var r in results)
-                    Console.WriteLine(r.ErrorMessage);
-                
+                    _errMsg += r.ErrorMessage + Environment.NewLine;
 
-            return _isValid;
+                throw new MineSweeperException(_errMsg);
+            }
         }
     }
 }

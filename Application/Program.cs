@@ -1,12 +1,9 @@
 ﻿using Autofac;
-using MineSweeper.DL;
-using MineSweeper.Services;
+using MineSweeper.Classes;
+using MineSweeper.Classes.CustomExceptions;
 using MineSweeper.Services.Interfaces;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MineSweeper
 {
@@ -14,9 +11,45 @@ namespace MineSweeper
     {
         static void Main(string[] args)
         {
-            IContainer _container = DependencyInjection.BuildContainer();
-            IMineSweeperLogic _mineSweeperLogic = _container.Resolve<IMineSweeperLogic>();
-            _mineSweeperLogic.GetGameSettings("C:\\Development\\MineSweeper\\settings.txt");
+            try
+            {
+                IContainer _container = DependencyInjection.BuildContainer();
+                IMineSweeperLogic _mineSweeperLogic = _container.Resolve<IMineSweeperLogic>();
+                var _settings = _mineSweeperLogic.GetGameSettings("..\\settings.txt");
+                var _fields = _mineSweeperLogic.BuildGameFields(_settings);
+                var _counter = 1;
+                foreach (var field in _fields)
+                {
+                    Console.WriteLine($"Field #{_counter}");
+
+                    for (int i = 0; i < field.FieldPanels.Count(); i++)
+                    {
+                        var op = "";
+                        for (int j = 0; j < field.FieldPanels[i].Count(); j++)
+                        {
+                            if (field.FieldPanels[i][j] is Mine)
+                                op += "*";
+                            else
+                                op += field.FieldPanels[i][j].AdjacentMines.ToString();
+                        }
+
+                        Console.WriteLine(op);
+                    }
+
+                    _counter++;
+                    Console.WriteLine();
+                }
+                
+            }
+            catch (MineSweeperException mex)
+            {
+                Console.WriteLine(mex.Message);
+            }
+            catch (Exception ex)
+            {
+                //in real life scenarios you would log to event log ar similar
+                Console.WriteLine(ex.Message);
+            }
         }
     }
 }
